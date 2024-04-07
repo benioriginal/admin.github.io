@@ -1,0 +1,100 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="index.js" type="module" defer></script>
+    <title>Pocanitii</title>
+    <!-- index.html -->
+    <script
+      src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"
+      type="module"
+    ></script>
+    <!-- Add other Firebase modules you need (auth, database, etc.) -->
+  </head>
+  <body>
+    <div
+      id="Addd"
+      style="
+        position: fixed;
+        background-color: #282828;
+        z-index: 9999;
+        width: 100%;
+      "
+    >
+      <button
+        id="exit"
+        style="
+          z-index: 999999999;
+          position: absolute;
+          left: 0;
+          font-size: 20;
+          padding: 5px;
+          background-color: transparent;
+        "
+      >
+        x
+      </button>
+
+      <form id="adForm">
+        <input type="file" id="images" name="images" multiple required />
+        <input
+          style="margin: 10px; z-index: 999"
+          type="text"
+          id="title"
+          name="title"
+          placeholder="Titlu"
+          required
+        />
+        <input
+          type="number"
+          style="margin: 10px; z-index: 999"
+          id="price"
+          name="price"
+          placeholder="Pret"
+          required
+        />
+        <label
+          for="price"
+          style="
+            color: white;
+            font-size: 30px;
+            font-family: 'Varela Round';
+            font-weight: bold;
+          "
+        >
+          LEI</label
+        >
+        <input
+          type="tel"
+          style="margin: 10px; margin-right: 50px; z-index: 999"
+          id="phoneNumber"
+          name="phoneNumber"
+          placeholder="Numar telefon"
+          required
+        />
+        <textarea
+          id="description"
+          style="margin: 10px; margin-right: 50px; z-index: 999"
+          name="description"
+          placeholder="Descriere"
+          required
+        ></textarea>
+        <input type="text" placeholder="username" name="username" required />
+        <p></p>
+        <input
+          type="password"
+          name="password"
+          placeholder="password"
+          required
+        />
+        <p></p>
+        <button type="submit">Publica</button>
+      </form>
+    </div>
+    <div id="main"></div>
+    <div style="display: flex; justify-content: center; align-items: center">
+      <button id="Add" style="z-index: 999999999">+</button>
+    </div>
+  </body>
+</html>
