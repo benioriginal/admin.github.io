@@ -47,6 +47,8 @@ get(adsRef)
         adDiv.innerHTML = `
           <button class="options-button">...</button>
           <div class="options" style="display: none;">
+            <input type="text" id="username" placeholder="Enter username">
+            <input type="password" id="password" placeholder="Enter password">
             <button class="toggle-vandut">Toggle Vandut</button>
             <button class="delete-ad">Delete Ad</button>
           </div>
@@ -61,25 +63,51 @@ get(adsRef)
         const optionsDiv = adDiv.querySelector('.options');
         const toggleVandutButton = optionsDiv.querySelector('.toggle-vandut');
         const deleteAdButton = optionsDiv.querySelector('.delete-ad');
+        const usernameInput = optionsDiv.querySelector('#username');
+        const passwordInput = optionsDiv.querySelector('#password');
 
         optionsButton.addEventListener('click', () => {
           optionsDiv.style.display = optionsDiv.style.display === 'none' ? 'block' : 'none';
         });
 
-        toggleVandutButton.addEventListener('click', () => {
-          ads[ad].vandut = !ads[ad].vandut;
-          const adRef = dbRef(db, 'Ads/' + ad);
-          update(adRef, { vandut: ads[ad].vandut });
-          location.reload();
+        toggleVandutButton.addEventListener('click', async () => {
+          const username = usernameInput.value;
+          const password = passwordInput.value;
+
+          try {
+            const userCredential = await signInWithEmailAndPassword(auth, username + '@example.com', password);
+            const user = userCredential.user;
+
+            if (user) {
+              ads[ad].vandut = !ads[ad].vandut;
+              const adRef = dbRef(db, 'Ads/' + ad);
+              update(adRef, { vandut: ads[ad].vandut });
+              location.reload();
+            }
+          } catch (error) {
+            alert('Invalid username or password', error);
+          }
         });
 
-        deleteAdButton.addEventListener('click', () => {
-          const adRef = dbRef(db, 'Ads/' + ad);
-          remove(adRef);
-          const adStorageRef = storageRef(storage, 'Ads/' + ad + "/");
-          deleteObject(adStorageRef);
-          main.removeChild(adDiv);
-          location.refresh()
+        deleteAdButton.addEventListener('click', async () => {
+          const username = usernameInput.value;
+          const password = passwordInput.value;
+
+          try {
+            const userCredential = await signInWithEmailAndPassword(auth, username + '@example.com', password);
+            const user = userCredential.user;
+
+            if (user) {
+              const adRef = dbRef(db, 'Ads/' + ad);
+              remove(adRef);
+              const adStorageRef = storageRef(storage, 'Ads/' + ad + "/");
+              deleteObject(adStorageRef);
+              main.removeChild(adDiv);
+              location.refresh()
+            }
+          } catch (error) {
+            alert('Invalid username or password', error);
+          }
         });
 
         main.appendChild(adDiv);
@@ -93,15 +121,74 @@ get(adsRef)
   });
 
 
+
   document.getElementById('adForm').addEventListener('submit', async function(event) {
     event.preventDefault();
-
+  
     const email = `${event.target.username.value}@example.com`;
     const password = event.target.password.value;
-  
+    
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+  
+      // Place your code here
+      const images = document.getElementById('images').files;
+      const title = document.getElementById('title').value;
+      const price = document.getElementById('price').value;
+  
+      const date = new Date().toISOString().substr(0, 10);
+  
+      const phoneNumber = document.getElementById('phoneNumber').value;
+  
+      const vandut = false;
+  
+      const description = document.getElementById('description').value;
+      const newAd = {
+        imagini: [], 
+        pret: price,
+        Data: date,
+        tel: phoneNumber,
+        Vandut: vandut,
+        desc: description
+      };
+  
+      const storage = getStorage(app);
+  
+      Array.from(images).forEach((image, index) => {
+        const imageStorageRef = storageRef(storage, 'Ads/' + title + '/imagini/' + image.name);
+  
+        const uploadTask = uploadBytesResumable(imageStorageRef, image);
+  
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+          },
+          (error) => {
+            console.error('Upload failed:', error);
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              console.log('File available at', downloadURL);
+  
+              newAd.imagini.push(downloadURL);
+              
+              if (newAd.imagini.length === images.length) {
+                const newAdDbRef = dbRef(db, 'Ads/' + title);
+                set(newAdDbRef, newAd)
+                  .then(() => {
+                    location.reload();
+                    console.log('New ad created successfully.');
+                  })
+                  .catch((error) => {
+                    console.error('Failed to create new ad:', error);
+                  });
+              }
+            });
+          }
+        );
+      });
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -111,61 +198,5 @@ get(adsRef)
         return;
       }
     }
-    const images = document.getElementById('images').files;
-    const title = document.getElementById('title').value;
-    const price = document.getElementById('price').value;
-  
-    const date = new Date().toISOString().substr(0, 10);
-  
-    const phoneNumber = document.getElementById('phoneNumber').value;
-  
-    const vandut = false;
-  
-    const description = document.getElementById('description').value;
-    const newAd = {
-      imagini: [], 
-      pret: price,
-      Data: date,
-      tel: phoneNumber,
-      Vandut: vandut,
-      desc: description
-    };
-  
-    const storage = getStorage(app);
-  
-    Array.from(images).forEach((image, index) => {
-      const imageStorageRef = storageRef(storage, 'Ads/' + title + '/imagini/' + image.name);
-  
-      const uploadTask = uploadBytesResumable(imageStorageRef, image);
-  
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Upload is ' + progress + '% done');
-        },
-        (error) => {
-          console.error('Upload failed:', error);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log('File available at', downloadURL);
-  
-            newAd.imagini.push(downloadURL);
-            
-            if (newAd.imagini.length === images.length) {
-              const newAdDbRef = dbRef(db, 'Ads/' + title);
-              set(newAdDbRef, newAd)
-                .then(() => {
-                  location.reload();
-                  console.log('New ad created successfully.');
-                })
-                .catch((error) => {
-                  console.error('Failed to create new ad:', error);
-                });
-            }
-          });
-        }
-      );
-    });
   });
   
