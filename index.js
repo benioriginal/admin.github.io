@@ -102,8 +102,6 @@ get(adsRef)
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      registerForm.style.display = "none";
-      document.getElementById("main").style.display = "block";
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
