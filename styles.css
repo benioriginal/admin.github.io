@@ -103,6 +103,7 @@ button {
     background-color: blue;
     color: white;
     font-weight: bold;
+    z-index: 9999999;
 }
 button:hover {
     background-color: rgb(3, 3, 187);
